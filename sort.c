@@ -1,6 +1,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 int extraMemoryAllocated;
 
@@ -8,6 +9,55 @@ int extraMemoryAllocated;
 // extraMemoryAllocated counts bytes of memory allocated
 void heapSort(int arr[], int n)
 {
+	// extra memory
+	int temp; 
+	extraMemoryAllocated += sizeof(temp);
+
+	// build max heap
+	// heapify down
+	for (int i = 1; i < n; i++) {
+		int parent = (i - 1) / 2;
+		int child = i;
+		if (arr[child] > arr[parent]) {
+			// heapify up
+			while(arr[child] > arr[parent]){
+				// swap
+				temp = arr[child];
+				arr[child] = arr[parent];
+				arr[parent] = temp;
+				// continue
+				child = parent;
+				parent = (child - 1) / 2;
+			}
+		}
+	}
+
+	// sort
+	for (int i = n - 1; i > 0; i--) {
+		// swap
+		temp = arr[0];
+		arr[0] = arr[i];
+		arr[i] = temp;
+
+		// heapify down
+		// last indexes sorted
+		for (int j = 1; j < i; j++) {
+			int parent = (j - 1) / 2;
+			int child = j;
+			if (arr[child] > arr[parent]) {
+				// heapify up
+				while(arr[child] > arr[parent]){
+					// swap
+					temp = arr[child];
+					arr[child] = arr[parent];
+					arr[parent] = temp;
+					// continue
+					child = parent;
+					parent = (child - 1) / 2;
+				}
+			}
+		}
+	}
 }
 
 
@@ -15,6 +65,55 @@ void heapSort(int arr[], int n)
 // extraMemoryAllocated counts bytes of extra memory allocated
 void mergeSort(int pData[], int l, int r)
 {
+	// left < right index
+	if(l < r){
+		// middle
+		int m = (l + r) / 2;
+
+		// left half
+		mergeSort(pData, l, m);
+
+		// right half
+		mergeSort(pData, m + 1, r);
+		
+		int i = 0;
+		int j = 0;
+		
+		// extra memory
+		int * sort = (int *) malloc((r - l + 1) * sizeof(int));
+		extraMemoryAllocated += (r - l + 1) * sizeof(int);
+		
+		// merge
+		while(l + i <= m || m + j + 1 <= r){
+			if(m + j + 1 > r){
+				sort[i + j] = pData[l + i];
+				i++;
+			}
+			else if(l + i > m){
+				sort[i + j] = pData[m + j + 1];
+				j++;
+			}
+			else if(pData[l + i] <= pData[m + j + 1]){
+				sort[i + j] = pData[l + i];
+				i++;
+			}
+			else if(pData[l + i] >= pData[m + j + 1]){
+				sort[i + j] = pData[m + j + 1];
+				j++;
+			}
+		}
+		
+		i = 0;
+
+		// copy
+		for(int k = l; k <= r; k++){
+			pData[k] = sort[i];
+			i++;
+		}
+
+		// free memory
+		free(sort);
+	}
 }
 
 // parses input file to an integer array
